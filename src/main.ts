@@ -5,13 +5,15 @@ import {
 } from '@nestjs/platform-fastify';
 import { AppModule } from './app.module';
 import { Logger } from '@nestjs/common';
-import { appConfig } from './app.config';
+import { AppConfig } from './app.config';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
     new FastifyAdapter(),
   );
+
+  const config = await app.resolve(AppConfig);
 
   process.on('uncaughtException', (err) => {
     const logger = new Logger('UncaughtException');
@@ -23,7 +25,7 @@ async function bootstrap() {
 
   app.enableShutdownHooks();
 
-  await app.listen(appConfig.port, '0.0.0.0');
+  await app.listen(config.port, '0.0.0.0');
 }
 
 void bootstrap();
