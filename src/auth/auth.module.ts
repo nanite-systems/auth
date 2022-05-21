@@ -2,13 +2,23 @@ import { Module } from '@nestjs/common';
 import { RedisModule } from '../redis/redis.module';
 import { AuthService } from './services/auth.service';
 import { AuthController } from './controllers/auth.controller';
-import { HttpModule } from '@nestjs/axios';
 import { AuthConfig } from './auth.config';
 import { ConfigModule } from '@census-reworked/nestjs-utils';
+import { Axios } from 'axios';
 
 @Module({
-  imports: [ConfigModule.forFeature([AuthConfig]), HttpModule, RedisModule],
-  providers: [AuthService],
+  imports: [ConfigModule.forFeature([AuthConfig]), RedisModule],
+  providers: [
+    AuthService,
+    {
+      provide: Axios,
+      useFactory: () =>
+        new Axios({
+          baseURL: 'https://census.daybreakgames.com',
+          maxRedirects: 0,
+        }),
+    },
+  ],
   controllers: [AuthController],
 })
 export class AuthModule {}

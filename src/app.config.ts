@@ -1,9 +1,10 @@
-import { IsInt, IsNotEmpty, Max, Min } from 'class-validator';
+import { IsInt, IsNotEmpty, IsOptional, Max, Min } from 'class-validator';
 import { Transform } from 'class-transformer';
-import {ProcessEnv} from "@census-reworked/nestjs-utils";
+import { ProcessEnv } from '@census-reworked/nestjs-utils';
 
 export class AppConfig {
   @ProcessEnv('APP_PORT')
+  @IsOptional()
   @IsInt()
   @IsNotEmpty()
   @Min(1)

@@ -3,22 +3,19 @@ import {
   Get,
   HttpCode,
   HttpStatus,
-  Inject,
   Query,
   UnauthorizedException,
 } from '@nestjs/common';
 import { AuthService } from '../services/auth.service';
 import { validateServiceId } from '../utils/service-id.helpers';
 import { hash } from 'bcrypt';
-import { Redis } from 'ioredis';
+import IORedis from 'ioredis';
 import { AuthConfig } from '../auth.config';
-import { REDIS } from '../../redis/constants';
 
 @Controller()
 export class AuthController {
   constructor(
-    @Inject(REDIS)
-    private readonly redis: Redis,
+    private readonly redis: IORedis,
     private readonly config: AuthConfig,
     private readonly auth: AuthService,
   ) {}

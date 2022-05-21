@@ -1,24 +1,23 @@
-import { Inject, Logger, Module } from '@nestjs/common';
-import IORedis, { Redis } from 'ioredis';
-import { RedisConfig } from './redis.config';
-import { REDIS } from './constants';
+import { Logger, Module } from '@nestjs/common';
 import { ConfigModule } from '@census-reworked/nestjs-utils';
+import IORedis from 'ioredis';
+import { RedisConfig } from './redis.config';
 
 @Module({
   imports: [ConfigModule.forFeature([RedisConfig])],
   providers: [
     {
-      provide: REDIS,
-      useFactory: (config: RedisConfig) => new IORedis(config.redisUrl),
+      provide: IORedis,
+      useFactory: (config: RedisConfig) => new IORedis(config.url),
       inject: [RedisConfig],
     },
   ],
-  exports: [REDIS],
+  exports: [IORedis],
 })
 export class RedisModule {
   private readonly logger = new Logger('Redis');
 
-  constructor(@Inject(REDIS) private readonly redis: Redis) {
+  constructor(private readonly redis: IORedis) {
     redis.on('error', (err) => {
       this.logger.error(err.toString());
 
