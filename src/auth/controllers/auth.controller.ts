@@ -14,8 +14,6 @@ export class AuthController {
   ) {
     const serviceId = this.extractServiceId(url);
 
-    console.log(url, serviceId);
-
     const check =
       serviceId &&
       validateServiceId(serviceId) &&
