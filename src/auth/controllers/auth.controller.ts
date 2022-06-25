@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { AuthService } from '../services/auth.service';
 import { validateServiceId } from '../utils/service-id.helpers';
-import { hash } from 'bcrypt';
+import { hash } from 'bcryptjs';
 import IORedis from 'ioredis';
 import { AuthConfig } from '../auth.config';
 
