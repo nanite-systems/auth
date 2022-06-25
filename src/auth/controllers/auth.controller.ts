@@ -1,5 +1,6 @@
 import {
   Controller,
+  ForbiddenException,
   Get,
   HttpCode,
   HttpStatus,
@@ -23,7 +24,7 @@ export class AuthController {
   @Get('/auth')
   @HttpCode(HttpStatus.OK)
   async authenticate(@Query('service-id') serviceId: string) {
-    if (!validateServiceId(serviceId)) throw new UnauthorizedException();
+    if (!validateServiceId(serviceId)) throw new ForbiddenException('403 Forbidden');
 
     const serviceIdHash = await hash(serviceId, this.config.salt);
     const cachedCheck: boolean = JSON.parse(
