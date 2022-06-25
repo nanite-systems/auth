@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Axios } from 'axios';
 import { hash } from 'bcryptjs';
 import IORedis from 'ioredis';
@@ -6,6 +6,8 @@ import { AuthConfig } from '../auth.config';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger('Auth');
+
   constructor(
     private readonly http: Axios,
     private readonly redis: IORedis,
@@ -20,11 +22,11 @@ export class AuthService {
 
   async checkServiceIdCached(serviceId: string): Promise<boolean> {
     const serviceIdHash = await hash(serviceId, this.config.salt);
-    const cachedCheck: boolean = JSON.parse(
+    const cachedCheck: boolean | null = JSON.parse(
       await this.redis.get(serviceIdHash),
     );
 
-    if (cachedCheck !== undefined) {
+    if (cachedCheck !== null) {
       return cachedCheck;
     }
 
@@ -35,6 +37,8 @@ export class AuthService {
       JSON.stringify(check),
     );
 
-    if (!check) return false;
+    this.logger.log(`Checked ${serviceIdHash} against Census: ${check}`);
+
+    return check;
   }
 }
