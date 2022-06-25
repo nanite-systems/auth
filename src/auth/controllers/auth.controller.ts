@@ -1,50 +1,23 @@
-import {
-  Controller,
-  ForbiddenException,
-  Get,
-  HttpCode,
-  HttpStatus,
-  Query,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Controller, Get, HttpStatus, Query, Res } from '@nestjs/common';
 import { AuthService } from '../services/auth.service';
 import { validateServiceId } from '../utils/service-id.helpers';
-import { hash } from 'bcryptjs';
-import IORedis from 'ioredis';
-import { AuthConfig } from '../auth.config';
+import { FastifyReply } from 'fastify';
 
 @Controller()
 export class AuthController {
-  constructor(
-    private readonly redis: IORedis,
-    private readonly config: AuthConfig,
-    private readonly auth: AuthService,
-  ) {}
+  constructor(private readonly auth: AuthService) {}
 
   @Get('/auth')
-  @HttpCode(HttpStatus.OK)
-  async authenticate(@Query('service-id') serviceId: string) {
-    if (!validateServiceId(serviceId))
-      throw new ForbiddenException('403 Forbidden');
+  async authenticate(
+    @Res() response: FastifyReply,
+    @Query('service-id') serviceId?: string,
+  ) {
+    const check =
+      serviceId &&
+      validateServiceId(serviceId) &&
+      (await this.auth.checkServiceIdCached(serviceId));
 
-    const serviceIdHash = await hash(serviceId, this.config.salt);
-    const cachedCheck: boolean = JSON.parse(
-      await this.redis.get(serviceIdHash),
-    );
-
-    if (cachedCheck === true) {
-      return;
-    } else if (cachedCheck === false) {
-      throw new UnauthorizedException('Invalid service id');
-    }
-
-    const check = await this.auth.checkServiceId(serviceId);
-    await this.redis.setex(
-      serviceIdHash,
-      this.config.ttl,
-      JSON.stringify(check),
-    );
-
-    if (!check) throw new UnauthorizedException();
+    if (check) response.code(HttpStatus.OK).send();
+    else response.code(HttpStatus.FORBIDDEN).send('403 Forbidden');
   }
 }
