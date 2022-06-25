@@ -11,12 +11,13 @@ import { ConfigModule } from '@census-reworked/nestjs-utils';
 async function bootstrap() {
   ConfigModule.forRoot();
 
+  const config = await ConfigModule.resolveConfig(AppConfig);
+
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
     new FastifyAdapter(),
+    { logger: config.logLevels },
   );
-
-  const config = await app.resolve(AppConfig);
 
   process.on('uncaughtException', (err) => {
     const logger = new Logger('UncaughtException');
