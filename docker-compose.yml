@@ -12,6 +12,8 @@ services:
     environment:
       - APP_PORT=3000
       - REDIS_URL=redis://redis:6379
+    profiles:
+      - full
 
   redis:
     image: redis:alpine
