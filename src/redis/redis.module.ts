@@ -18,10 +18,16 @@ export class RedisModule {
   private readonly logger = new Logger('Redis');
 
   constructor(private readonly redis: IORedis) {
+    redis.on('connect', () => {
+      this.logger.log('Connected');
+    });
+
+    redis.on('reconnecting', () => {
+      this.logger.log('Reconnecting');
+    });
+
     redis.on('error', (err) => {
       this.logger.error(err.toString());
-
-      throw err;
     });
   }
 }
